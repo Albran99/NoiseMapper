@@ -23,8 +23,23 @@ def save_request():
 
 @app.route('/measurements', methods=['GET'])
 def get_requests():
-    # Retrieve all requests from the database
-    c.execute("SELECT * FROM noise_measurements ORDER BY timestamp DESC")
+    # get the the start and end timestamps from the query parameters
+    start_from = request.args.get('start_from')
+    end_to = request.args.get('end_to')
+    if not start_from or not end_to:
+        start_from = str(time() - 3600*24*7)
+        end_to = str(time())
+    # if the query parameters are malformed, set the default values
+    if not start_from.isdigit() or not end_to.isdigit():
+        start_from = int(time()) - 3600*24*7
+        end_to = int(time())
+    if int(start_from) > int(end_to) or int(end_to) > int(time()) or int(start_from) < 0:
+        start_from = int(time()) - 3600*24*7
+        end_to = int(time())
+        
+    start_from = int(start_from)
+    end_to = int(end_to)
+    c.execute("SELECT * FROM noise_measurements WHERE timestamp >= ? AND timestamp <= ?", (start_from, end_to))
     rows = c.fetchall()
     return rows
 
