@@ -1,21 +1,16 @@
 package it.dii.unipi.masss.noisemapper
 
-import android.app.DatePickerDialog
-import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.DatePicker
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.fragment.app.DialogFragment
 import it.dii.unipi.masss.noisemapper.ui.theme.NoiseMapperTheme
-import java.util.Calendar
 import com.google.android.material.datepicker.MaterialDatePicker
 
 import androidx.core.util.Pair
@@ -41,7 +36,7 @@ class MainActivity : AppCompatActivity(){
         }
         button.setOnClickListener(listener)
         buttonNoiseMap.setOnClickListener(listener)
-        val pickDateButton: Button = findViewById(R.id.pickDate)
+        val pickDateButton: Button = findViewById(R.id.pick_range)
         pickDateButton.setOnClickListener {
             val dateRangePicker =
                 MaterialDatePicker.Builder.dateRangePicker()

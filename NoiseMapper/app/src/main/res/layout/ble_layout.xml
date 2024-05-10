@@ -5,55 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/db_level"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="120dp"
-        android:text="@string/noise_measurement"
-        android:textSize="60sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/stop_ble"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:text="@string/db"
-        android:textSize="60sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/stop_ble"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.007"
-        app:layout_constraintStart_toEndOf="@+id/db_level" />
-
     <Button
-        android:id="@+id/stop_ble"
+        android:id="@+id/pick_range"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/noise_sensing_stop_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.866" />
+        android:text="Pick range"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="627dp" />
 
-    <ListView
-        android:id="@+id/beacon_list"
-        android:layout_width="418dp"
-        android:layout_height="583dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="1dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="408dp"
+        android:layout_height="599dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" >
+
+    </WebView>
 
     <TextView
-        android:id="@+id/average_noise"
+        android:id="@+id/sensing_on_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="178dp"
@@ -65,57 +35,20 @@
         app:layout_constraintStart_toStartOf="parent" />
 
 
-    <DatePicker
-        android:id="@+id/start_date"
-        android:layout_width="416dp"
-        android:layout_height="93dp"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.32999998" />
-
-
-    <DatePicker
-        android:id="@+id/end_date"
-        android:layout_width="413dp"
-        android:layout_height="106dp"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/switch1"
-        android:layout_width="157dp"
-        android:layout_height="90dp"
+        android:id="@+id/switch_scanning"
+        android:layout_width="98dp"
+        android:layout_height="61dp"
         android:checked="false"
         android:text="Sensing"
         android:textOff="OFF"
         android:textOn="ON"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.74"
+        app:layout_constraintHorizontal_bias="0.948"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.13999999"
+        app:layout_constraintVertical_bias="0.916"
         tools:checked="false" />
 
-    <Button
-        android:id="@+id/update_map"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/update_map_button"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

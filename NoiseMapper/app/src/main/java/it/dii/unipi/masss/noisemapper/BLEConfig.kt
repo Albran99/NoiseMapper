@@ -28,7 +28,7 @@ class BLEConfig(private val context: Context, offline: Boolean = false) {
     init {
         if (!offline) {
             GetConfigFileFromServer(url)
-            synchronized(lock) {
+            synchronized(lock) { // wait download finished
                 lock.wait()
             }
         }
@@ -63,13 +63,9 @@ class BLEConfig(private val context: Context, offline: Boolean = false) {
         return stringBuilder.toString()
     }
     fun readJSONfile(): Boolean {
-
         try {
             val gson = Gson()
-
-
             val fileName = "config.json"
-
             synchronized(lock) {
                 val jsonString = readFromFile(context, fileName)
                 // Parse JSON to JsonObject
@@ -87,7 +83,6 @@ class BLEConfig(private val context: Context, offline: Boolean = false) {
 
 
     fun retrieveFileFromServer(url: String, context: Context, callback: FileDownloadCallback, fileToSave: String) {
-
         Thread {
             synchronized(lock) {
                 try {
@@ -138,4 +133,3 @@ class BLEConfig(private val context: Context, offline: Boolean = false) {
         return successfulConfig
     }
 }
-// "the value is saved /data/user/0/it.dii.unipi.masss.noisemapper/files/config.json"

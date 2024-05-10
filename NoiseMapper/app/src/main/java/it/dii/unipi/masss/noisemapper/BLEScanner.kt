@@ -66,7 +66,7 @@ class BLEScanner (val activity: NoiseDetection) {
                 val average_noise =
                     activity.map_noise_level.filter { it.key > lastUpdate && it.value != Double.NEGATIVE_INFINITY }.values.toList()
                         .average()
-                activity.findViewById<TextView>(R.id.average_noise).text =
+                activity.findViewById<TextView>(R.id.sensing_on_info).text =
                     "Average noise level: $average_noise"
                 lastUpdate = System.currentTimeMillis()
                 pushUpdate(nearest_room, average_noise, tonino)
@@ -148,6 +148,9 @@ class BLEScanner (val activity: NoiseDetection) {
 
     fun stopScanning() {
         proximityManager.stopScanning()
+        if (json_array_request.isNotEmpty()) {
+
+        }
         flushRequest() // this is to send the last batch of data also if the window is not full
     }
 

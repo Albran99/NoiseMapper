@@ -22,6 +22,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Build
+import android.webkit.WebView
 import android.widget.DatePicker
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
@@ -52,78 +53,64 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.ble_layout)
-        val button: Button = findViewById(R.id.stop_ble)
-        button.setOnClickListener {
-            // Create an Intent to return to the main activity
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            // Close the current activity
-        }
-        // call the class to read the BLEConfig file
+
+        val webView: WebView = findViewById(R.id.webview)
+        webView.settings.javaScriptEnabled = true;
+        webView.settings.allowFileAccess = true;
+        webView.settings.builtInZoomControls = true;
+        //webView.webViewClient = WebViewClient()
+        // I'd like to to this:
+        webView.loadUrl("file://" + filesDir.absolutePath + "/output.html")
+
         bleConfig = BLEConfig(this.applicationContext)
-        if (bleConfig.gotConfig()){
-            //println(bleConfig.beaconRoomMap?.mapping?.get("bpGG"))
-            // Initialize Kontakt SDK
-            KontaktSDK.initialize(this);
+        if (bleConfig.gotConfig()){ // maybe config retrieval failed
+            KontaktSDK.initialize(this);  // Initialize Kontakt SDK
+            // Services that cannot be started without config:
             ble_scanner = BLEScanner(this)
+            pollingRequest = PollingRequest(this, bleConfig)
+            // TODO: disable spinner
+        } else {
+            // TODO: fail
+            // TODO: startActivity(Intent(this, FailActivity::class.java))
         }
-        pollingRequest = PollingRequest(this, bleConfig)
-        val switch1 : SwitchCompat = findViewById<SwitchCompat>(R.id.switch1)
-        switch1.isChecked = false
-        switch1.setOnCheckedChangeListener { _, isChecked ->
+        val switch : SwitchCompat = findViewById<SwitchCompat>(R.id.switch_scanning)
+        switch.isChecked = false
+        switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // make the date picker invisible
-                val datePicker = findViewById<DatePicker>(R.id.start_date)
-                datePicker.visibility = DatePicker.GONE
-                val datePicker2 = findViewById<DatePicker>(R.id.end_date)
-                datePicker2.visibility = DatePicker.GONE
-                requestPermissions()
-                sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-                proximitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_PROXIMITY)
-                sensorManager?.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
-                pollingRequest!!.start()
+                enterSensingState()
             } else {
-                switchOff()
-                val datePicker = findViewById<DatePicker>(R.id.start_date)
-                datePicker.visibility = DatePicker.VISIBLE
-                val datePicker2 = findViewById<DatePicker>(R.id.end_date)
-                datePicker2.visibility = DatePicker.VISIBLE
-                // Clear the view
-                val sound = findViewById<TextView>(R.id.db_level)
-                sound.text = "0.0"
+                exitSensingState()
 
             }
         }
-        // get the update button
-        val updateButton: Button = findViewById(R.id.update_map)
-        updateButton.setOnClickListener {
-            // check if the switch is off
-            if (!switch1.isChecked) {
-                val start_from_timestamp = getTimestamp(findViewById<DatePicker>(R.id.start_date))
-                val end_to_timestamp = getTimestamp(findViewById<DatePicker>(R.id.end_date))
-                Log.i("NoiseDetection", "Start from timestamp: $start_from_timestamp")
-                Log.i("NoiseDetection", "End to timestamp: $end_to_timestamp")
-                pollingRequest!!.performGetRequest(start_from_timestamp, end_to_timestamp)
-                pollingRequest!!.stop()
-            }
-            else{
-                // Create a tost to show the user that you cannot update the map while the switch is on
-                Toast.makeText(applicationContext, "Please turn off the " +
-                        "switch to update the map", Toast.LENGTH_LONG).show()
-            }
-        }
+    }
 
+    private fun exitSensingState() {
+        switchOff()
+        // Clear the view
+        // TODO: update ui
 
     }
-     private fun switchOff(){
-        // restore the date picker visibility
 
+    private fun enterSensingState() {
+        // TODO: update ui labels
+        requestPermissions()
+        // setup proximity sensor
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        proximitySensor = sensorManager?.getDefaultSensor(Sensor.TYPE_PROXIMITY)
+        sensorManager?.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
+        pollingRequest?.start()
+    }
+
+    private fun switchOff(){
         //stop the polling
         Log.i("NoiseDetection", "Switch is off")
         pollingRequest?.stop()
-        if(mRecorder != null){
+        if(mRecorder != null) {
             mRecorder?.stop()
             mRecorder = null
+        }
+        if (timer != null) {
             timer?.cancel()
             timer = null
         }
@@ -135,11 +122,6 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun getTimestamp(date: DatePicker): Long {
-        val calendar = Calendar.getInstance()
-        calendar.set(date.year, date.month, date.dayOfMonth)
-        return calendar.timeInMillis / 1000
-    }
     private fun requestPermissions() {
         val requiredPermissions =
             arrayOf(Manifest.permission.RECORD_AUDIO) +
@@ -149,15 +131,14 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
                 android.Manifest.permission.BLUETOOTH_SCAN,
                 android.Manifest.permission.BLUETOOTH_CONNECT,
                 android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) // Note that there is no need to ask about ACCESS_FINE_LOCATION anymore for BT scanning purposes for VERSION_CODES.S and higher if you add android:usesPermissionFlags="neverForLocation" under BLUETOOTH_SCAN in your manifest file.
+            ) // Note that there is no need to ask about ACCESS_FINE_LOCATION anymore for BT scanning purposes for VERSION_CODES.S and higher if we add android:usesPermissionFlags="neverForLocation" under BLUETOOTH_SCAN in your manifest file.
 
         // check if the permissions are already granted
         val notGrantedPermissions = requiredPermissions.filter {
             ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }.toTypedArray()
 
-        if (notGrantedPermissions.isNotEmpty()) {
-            // request the permissions
+        if (notGrantedPermissions.isNotEmpty()) { // at least one permission has not been granted
             ActivityCompat.requestPermissions(
                 this,
                 notGrantedPermissions,
@@ -165,7 +146,7 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
             )
         } else {
             println("iBeacon: Permissions already granted, starting scanning")
-            startSensing()
+            startSensing() // TODO: there may be a bug here: it may be possible to start sensing without checking if the bt adapter is enabled. But what should the logical flow look like?
         }
         // check that bluetooth is enabled, if not, ask the user to enable it
         val bluetoothAdapter = android.bluetooth.BluetoothManager::class.java.cast(
@@ -199,7 +180,7 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    private fun startSensing(){
+    private fun startSensing(){ // maybe
         Log.d("MicrophoneRequest", "Permission granted")
         initializeMediaRecorder()
         noise_sampling()
@@ -230,7 +211,6 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
         }
     }
     private inner class RecorderTask(private val recorder: MediaRecorder) : TimerTask() {
-        private val sound = findViewById<TextView>(R.id.db_level)
 
         override fun run() {
             runOnUiThread {
@@ -244,7 +224,7 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
                 val currentTimestamp = System.currentTimeMillis()
                 map_noise_level[currentTimestamp] = amplitudeDb
                 Log.i("NoiseDetection", "Level db is $amplitudeDb at time $currentTimestamp")
-                sound.text = String.format("%.1f", amplitudeDb)
+                /*
                 when {
                     amplitudeDb > 80 -> { // High noise level
                         sound.setTextColor(ContextCompat.getColor(this@NoiseDetection, R.color.high_noise))
@@ -256,6 +236,7 @@ class NoiseDetection : AppCompatActivity(), SensorEventListener {
                         sound.setTextColor(ContextCompat.getColor(this@NoiseDetection, R.color.low_noise))
                     }
                 }
+                 */
             }
         }
     }

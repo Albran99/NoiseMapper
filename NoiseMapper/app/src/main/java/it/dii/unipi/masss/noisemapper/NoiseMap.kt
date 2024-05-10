@@ -19,6 +19,7 @@ class NoiseMap: AppCompatActivity() {
         val webView : WebView = findViewById(R.id.webview)
         webView.settings.javaScriptEnabled = true;
         webView.settings.allowFileAccess = true;
+        webView.settings.builtInZoomControls = true;
         //webView.webViewClient = WebViewClient()
         // I'd like to to this:
         webView.loadUrl("file://" + filesDir.absolutePath + "/output.html")
